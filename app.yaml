@@ -1,0 +1,4 @@
+kind: wasmer.io/App.v0
+name: promptveo3
+owner: sofyan784
+package: .
