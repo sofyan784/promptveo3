@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PROMPT GENERATOR BY FYN (dengan Terjemahan Otomatis)</title>
+    <title>PROMPT GENERATOR BY FYN (dengan Terjemahan Otomatis & Gemini AI)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet"> 
@@ -27,6 +27,7 @@
             color: #374151;
         }
         input[type="text"],
+        input[type="password"],
         textarea,
         select {
             width: 100%;
@@ -36,9 +37,10 @@
             margin-bottom: 1rem;
             box-sizing: border-box;
             transition: border-color 0.3s;
-            background-color: #fff; /* Ensure inputs have white background */
+            background-color: #fff;
         }
         input[type="text"]:focus,
+        input[type="password"]:focus,
         textarea:focus,
         select:focus {
             border-color: #3b82f6;
@@ -56,6 +58,9 @@
             cursor: pointer;
             font-weight: 600;
             transition: background-color 0.3s, transform 0.1s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         .btn-primary {
             background-color: #3b82f6; /* Biru */
@@ -75,14 +80,25 @@
         .btn-secondary:hover {
             background-color: #4b5563;
         }
+        .btn-gemini {
+             background-color: #8b5cf6; /* Ungu */
+             color: white;
+        }
+        .btn-gemini:hover {
+            background-color: #7c3aed;
+        }
+        .btn-gemini:disabled {
+            background-color: #c4b5fd;
+            cursor: not-allowed;
+        }
         button:active {
             transform: translateY(1px);
         }
         .prompt-output-container {
             margin-top: 2rem;
             padding: 1.5rem;
-            background-color: #eef2ff; /* Latar belakang biru muda untuk prompt */
-            border: 1px dashed #c7d2fe; /* Garis putus-putus biru */
+            background-color: #eef2ff;
+            border: 1px dashed #c7d2fe;
             border-radius: 8px;
             color: #374151;
         }
@@ -108,24 +124,25 @@
             word-wrap: break-word;
         }
         #promptOutputEnFinal {
-            background-color: #f9fafb; /* Latar belakang sedikit berbeda untuk yang tidak bisa diedit */
+            background-color: #f9fafb;
             padding: 1rem;
             border-radius: 8px;
             border: 1px solid #e5e7eb;
             white-space: pre-wrap;
             word-wrap: break-word;
             color: #4b5563;
+            min-height: 150px;
         }
         .toast {
             position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background-color: #10b981; /* Hijau untuk sukses */
+            background-color: #10b981;
             color: white;
             padding: 10px 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             z-index: 1000;
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
@@ -133,24 +150,47 @@
         .toast.show {
             opacity: 1;
         }
-        h1.app-title { /* Kelas baru untuk judul aplikasi */
-            font-family: 'Poppins', sans-serif; /* Font Poppins */
-            font-size: 2.5rem; /* Ukuran font lebih besar */
+        h1.app-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5rem;
             font-weight: 700;
-            color: #2563eb; /* Warna biru */
+            color: #2563eb;
             text-align: center;
             margin-bottom: 0.5rem; 
         }
         .grid-cols-2 {
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
+        .loader {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #8b5cf6;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="app-title">PROMPT GENERATOR BY TERNAK AI</h1>
-        <p class="text-center text-gray-500 text-sm mb-2">Dengan Terjemahan Otomatis</p>
-        <p class="text-center text-gray-400 text-xs mb-8">Memerlukan koneksi internet untuk fitur terjemahan.</p>
+        <h1 class="app-title">PROMPT GENERATOR BY FYN</h1>
+        <p class="text-center text-gray-500 text-sm mb-2">Dengan Terjemahan & ✨ Bantuan AI</p>
+        <p class="text-center text-gray-400 text-xs mb-8">Memerlukan koneksi internet untuk fitur terjemahan & AI.</p>
+        
+        <!-- API Key Input Section -->
+        <div class="mb-6 bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+            <label for="apiKeyInput" class="font-semibold text-gray-700">Kunci API Gemini Anda:</label>
+            <div class="flex space-x-2 mt-2">
+                <input type="password" id="apiKeyInput" class="flex-grow !m-0" placeholder="Masukkan Kunci API Gemini Anda di sini...">
+                <button id="saveApiBtn" class="btn-primary flex-shrink-0">Simpan</button>
+            </div>
+             <p class="text-xs text-gray-500 mt-2">Kunci API diperlukan untuk fitur "Buat Ide Acak" dan "Kembangkan Prompt".</p>
+        </div>
 
         <div class="grid md:grid-cols-2 gap-x-6">
             <div>
@@ -203,7 +243,7 @@
                     <option value="Pan Up" data-en="Pan Up">Pan Up (Geser Atas)</option>
                     <option value="Pan Down" data-en="Pan Down">Pan Down (Geser Bawah)</option>
                     <option value="Tilt Up" data-en="Tilt Up">Tilt Up (Dongak ke Atas)</option>
-                    <option value="Tilt Down" data-en="Tilt Down">Tilt Down (Tunduk ke Bawah)</option>
+                    <option value="Tilt Down" data-en="Tilt Down">Tunduk ke Bawah)</option>
                     <option value="Rotate Clockwise" data-en="Rotate Clockwise">Rotate Clockwise (Putar Searah Jarum Jam)</option>
                     <option value="Rotate Counter-Clockwise" data-en="Rotate Counter-Clockwise">Rotate Counter-Clockwise (Putar Berlawanan Arah Jarum Jam)</option>
                     <option value="Dolly In" data-en="Dolly In">Dolly In (Maju Mendekat)</option>
@@ -307,8 +347,11 @@
             <textarea id="additionalDetails" placeholder="Contoh: efek partikel debu, lensa flare, kualitas 8K, rasio aspek 16:9"></textarea>
         </div>
         
-        <div class="flex space-x-4 mt-6">
+        <div class="flex space-x-2 mt-6">
             <button id="generateBtn" class="btn-primary flex-grow">Hasilkan Prompt</button>
+            <button id="geminiIdeaBtn" class="btn-gemini flex-grow" disabled>✨ Buat Ide Acak</button>
+        </div>
+         <div class="flex space-x-2 mt-2">
             <button id="copyIdBtn" class="btn-secondary flex-grow" style="display: none;">Salin Prompt Indonesia</button>
             <button id="copyEnBtn" class="btn-secondary flex-grow" style="display: none;">Salin Prompt Inggris</button>
         </div>
@@ -318,9 +361,10 @@
                 <h3>Prompt Bahasa Indonesia (Dapat Diedit):</h3>
                 <textarea id="promptOutputIdEditable"></textarea>
             </div>
-            <div class="prompt-output-column">
+            <div class="prompt-output-column relative">
                 <h3>Prompt Bahasa Inggris (Final):</h3>
                 <p id="promptOutputEnFinal"></p>
+                <button id="geminiImproveBtn" class="btn-gemini absolute bottom-4 right-4 text-sm" style="display:none;" disabled>✨ Kembangkan Prompt Ini</button>
             </div>
         </div>
     </div>
@@ -328,9 +372,15 @@
     <div id="toastNotification" class="toast"></div>
 
     <script>
+        // Global variable for API Key
+        let userApiKey = '';
+
         // Get DOM elements
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const saveApiBtn = document.getElementById('saveApiBtn');
+
         const subjectInput = document.getElementById('subject');
-        const subjectClothingInput = document.getElementById('subjectClothing'); // Elemen baru
+        const subjectClothingInput = document.getElementById('subjectClothing');
         const nationalitySelect = document.getElementById('nationality');
         const actionInput = document.getElementById('action');
         const expressionInput = document.getElementById('expression');
@@ -346,6 +396,8 @@
         const additionalDetailsTextarea = document.getElementById('additionalDetails');
 
         const generateBtn = document.getElementById('generateBtn');
+        const geminiIdeaBtn = document.getElementById('geminiIdeaBtn');
+        const geminiImproveBtn = document.getElementById('geminiImproveBtn');
         const copyIdBtn = document.getElementById('copyIdBtn');
         const copyEnBtn = document.getElementById('copyEnBtn');
         
@@ -354,20 +406,175 @@
         const generatedPromptOutputsContainer = document.getElementById('generatedPromptOutputsContainer');
         const toastNotification = document.getElementById('toastNotification');
 
+        // Save API Key
+        saveApiBtn.addEventListener('click', () => {
+            const key = apiKeyInput.value.trim();
+            if (key) {
+                userApiKey = key;
+                geminiIdeaBtn.disabled = false;
+                geminiImproveBtn.disabled = false; // Also enable this one
+                showToast("Kunci API berhasil disimpan!");
+                apiKeyInput.style.borderColor = '#10b981'; // Green border for success
+            } else {
+                showToast("Mohon masukkan Kunci API yang valid.", true);
+                apiKeyInput.style.borderColor = '#ef4444'; // Red border for error
+            }
+        });
+
         function getSelectedEnText(selectElement) {
             return selectElement.options[selectElement.selectedIndex].dataset.en;
         }
 
-        /**
-         * Translates text using the MyMemory API.
-         * @param {string} text - The text to translate.
-         * @returns {Promise<string>} The translated text.
-         */
+        async function callGeminiAPI(prompt, isJson = false) {
+            if (!userApiKey) {
+                throw new Error("Kunci API Gemini belum diatur. Mohon masukkan kunci Anda terlebih dahulu.");
+            }
+
+            const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${userApiKey}`;
+
+            const payload = {
+                contents: [{ role: "user", parts: [{ text: prompt }] }]
+            };
+
+            if (isJson) {
+                payload.generationConfig = {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            "subjek": { "type": "STRING" },
+                            "pakaian": { "type": "STRING" },
+                            "ekspresi": { "type": "STRING" },
+                            "aksi": { "type": "STRING" },
+                            "tempat": { "type": "STRING" },
+                        },
+                        // --- FIXED: Explicitly require all fields ---
+                        required: ["subjek", "pakaian", "aksi", "ekspresi", "tempat"]
+                    }
+                };
+            }
+
+            try {
+                const response = await fetch(GEMINI_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                         throw new Error(`Otorisasi Gagal (401). Periksa kembali Kunci API Anda.`);
+                    }
+                    const errorBody = await response.text();
+                    console.error("Gemini API Error Response:", errorBody);
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    return text;
+                } else {
+                    console.error("Unexpected Gemini API response structure:", result);
+                    if(result.promptFeedback && result.promptFeedback.blockReason) {
+                        return `Error: Request was blocked by the API. Reason: ${result.promptFeedback.blockReason}`;
+                    }
+                    if (result.candidates && result.candidates[0].finishReason !== 'STOP'){
+                        return `Error: The model stopped generating for an unexpected reason: ${result.candidates[0].finishReason}`;
+                    }
+                    throw new Error("No content generated or unexpected response structure.");
+                }
+            } catch (error) {
+                console.error('Error calling Gemini API:', error);
+                throw error;
+            }
+        }
+
+        geminiIdeaBtn.addEventListener('click', async () => {
+            const originalButtonText = geminiIdeaBtn.innerHTML;
+            geminiIdeaBtn.disabled = true;
+            geminiIdeaBtn.innerHTML = `<div class="loader"></div> Mencari Ide...`;
+
+            try {
+                // MODIFIED PROMPT: Added stricter constraints and length limits.
+                const prompt = "Buatkan sebuah ide adegan video. Hasilnya HARUS berupa objek JSON SAJA, tanpa teks lain. Gunakan struktur ini: {\"subjek\": \"...\", \"pakaian\": \"...\", \"ekspresi\": \"...\", \"aksi\": \"...\", \"tempat\": \"...\"}. Semua nilai HARUS dalam Bahasa Indonesia dan singkat, antara 3 sampai 12 kata per nilai.";
+                const responseText = await callGeminiAPI(prompt, true);
+
+                if (responseText.startsWith("Error:")) {
+                    throw new Error(responseText);
+                }
+                
+                let idea;
+                try {
+                    let jsonString = responseText;
+                    const startIndex = jsonString.indexOf('{');
+                    const endIndex = jsonString.lastIndexOf('}');
+
+                    if (startIndex === -1 || endIndex === -1 || endIndex < startIndex) {
+                         throw new Error("Respons AI tidak mengandung format JSON yang valid.");
+                    }
+
+                    jsonString = jsonString.substring(startIndex, endIndex + 1);
+                    idea = JSON.parse(jsonString);
+
+                } catch (parseError) {
+                    console.error("JSON Parse Error:", parseError);
+                    console.error("Original AI Response was:", responseText);
+                    throw new Error("Gagal memproses respons dari AI. Format tidak sesuai.");
+                }
+
+                // Fill form fields. The || '' ensures that if a key is missing, it just fills an empty string.
+                subjectInput.value = idea.subjek || '';
+                subjectClothingInput.value = idea.pakaian || '';
+                expressionInput.value = idea.ekspresi || '';
+                actionInput.value = idea.aksi || '';
+                placeInput.value = idea.tempat || '';
+                
+                showToast("✨ Ide baru dalam Bahasa Indonesia telah dibuat oleh AI!");
+                
+            } catch (error) {
+                showToast(`${error.message}`, true);
+            } finally {
+                geminiIdeaBtn.disabled = false;
+                geminiIdeaBtn.innerHTML = originalButtonText;
+            }
+        });
+
+        geminiImproveBtn.addEventListener('click', async () => {
+            const currentPrompt = promptOutputEnFinal.textContent;
+            if (!currentPrompt) {
+                showToast("Tidak ada prompt untuk dikembangkan.", true);
+                return;
+            }
+
+            const originalButtonText = geminiImproveBtn.innerHTML;
+            geminiImproveBtn.disabled = true;
+            geminiImproveBtn.innerHTML = `<div class="loader" style="border-top-color: #fff;"></div>`;
+
+            try {
+                const prompt = `Take the following video prompt and make it more detailed, vivid, and cinematic. Add specific visual details, textures, sensory information, and expand on the mood. Do not change the core subject, action, or setting. Keep it as one single block of text. Here is the prompt:\n\n"${currentPrompt}"`;
+                const improvedPrompt = await callGeminiAPI(prompt);
+                 if (improvedPrompt.startsWith("Error:")) {
+                    throw new Error(improvedPrompt);
+                }
+                promptOutputEnFinal.textContent = improvedPrompt;
+                showToast("✨ Prompt berhasil dikembangkan oleh AI!");
+            } catch (error) {
+                showToast(`Gagal mengembangkan prompt: ${error.message}`, true);
+            } finally {
+                geminiImproveBtn.disabled = false;
+                geminiImproveBtn.innerHTML = originalButtonText;
+            }
+        });
+
         async function translateText(text) {
             if (!text || !text.trim()) {
-                return ""; // Return empty string if input is empty or just whitespace
+                return ""; 
             }
-            const langPair = 'id|en'; // Indonesian to English
+            const langPair = 'id|en';
             const apiUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`;
 
             try {
@@ -377,26 +584,23 @@
                 }
                 const data = await response.json();
                 if (data.responseStatus !== 200) {
-                    // Jika ada pesan error spesifik dari API, gunakan itu
                     const errorMessage = data.responseDetails || `Translation API error for: "${text}"`;
                     console.error('Translation API Error:', errorMessage, data);
-                    showToast(`Gagal menerjemahkan: "${text.substring(0,20)}...". Detail: ${data.responseDetails}`, true);
+                    showToast(`Gagal menerjemahkan: "${text.substring(0,20)}...".`, true);
                     return text + " [Translation Failed]";
                 }
-                // The API returns the translation in responseData.translatedText
                 return data.responseData.translatedText;
             } catch (error) {
                 console.error('Fetch/Network Translation error:', error);
-                // Fallback to original text if translation fails, with a note
                 showToast(`Gagal menerjemahkan: "${text.substring(0,20)}...". Periksa koneksi.`, true);
                 return text + " [Translation Failed]";
             }
         }
 
 
-        generateBtn.addEventListener('click', async () => { // Make the function async
+        generateBtn.addEventListener('click', async () => {
             const subject = subjectInput.value.trim();
-            const subjectClothing = subjectClothingInput.value.trim(); // Ambil nilai pakaian
+            const subjectClothing = subjectClothingInput.value.trim();
             const nationality = nationalitySelect.value;
             const nationalityEn = getSelectedEnText(nationalitySelect);
             const action = actionInput.value.trim();
@@ -423,97 +627,58 @@
                 return;
             }
 
-            // --- Show Loading State ---
+            const originalButtonText = generateBtn.textContent;
             generateBtn.disabled = true;
-            generateBtn.textContent = 'Menerjemahkan & Menghasilkan...';
+            generateBtn.innerHTML = `<div class="loader" style="border-top-color: #fff;"></div> Menerjemahkan...`;
 
             try {
-                // --- Generate Indonesian Prompt ---
                 let promptId = `Sebuah video dengan gaya ${videoStyle}, menampilkan ${subject}`;
-                if (subjectClothing) { // Tambahkan pakaian jika ada
-                    promptId += ` mengenakan ${subjectClothing}`;
-                }
-                if (nationality && nationality !== "Tidak Spesifik") {
-                    promptId += ` berkebangsaan ${nationality}`;
-                }
+                if (subjectClothing) promptId += ` mengenakan ${subjectClothing}`;
+                if (nationality && nationality !== "Tidak Spesifik") promptId += ` berkebangsaan ${nationality}`;
                 if (expression) promptId += ` dengan ekspresi ${expression}`;
                 promptId += ` sedang ${action} di ${place} pada ${time}.`;
                 
-                let detailsIdArray = [];
-                if (cameraMovement) detailsIdArray.push(`Gerakan Kamera: ${cameraMovement}`);
-                if (lighting) detailsIdArray.push(`Pencahayaan: ${lighting}`);
-                if (videoMood) detailsIdArray.push(`Suasana Video: ${videoMood}`);
+                let detailsIdArray = [`Gerakan Kamera: ${cameraMovement}`, `Pencahayaan: ${lighting}`, `Suasana Video: ${videoMood}`];
                 if (soundMusic) detailsIdArray.push(`Suara/Musik: ${soundMusic}`);
-                if (language && language !== "Tidak Spesifik") {
-                    detailsIdArray.push(`Bahasa yang Digunakan: ${language}`);
-                }
+                if (language && language !== "Tidak Spesifik") detailsIdArray.push(`Bahasa yang Digunakan: ${language}`);
                 if (spokenLines) detailsIdArray.push(`Kalimat yang Diucapkan: "${spokenLines}"`);
                 if (additionalDetails) detailsIdArray.push(`Detail Tambahan: ${additionalDetails}`);
-
-                if (detailsIdArray.length > 0) {
-                    promptId += `\n\n${detailsIdArray.join(".\n")}.`;
-                } else {
-                    promptId += ".";
-                }
+                promptId += `\n\n${detailsIdArray.join(".\n")}.`;
                 promptOutputIdEditable.value = promptId.trim();
 
-                // --- Perform Translations in Parallel ---
                 const [
                     subjectEn, subjectClothingEn, actionEn, expressionEn, placeEn, soundMusicEn, additionalDetailsEn
                 ] = await Promise.all([
-                    translateText(subject),
-                    translateText(subjectClothing), // Terjemahkan pakaian
-                    translateText(action),
-                    translateText(expression),
-                    translateText(place),
-                    translateText(soundMusic),
+                    translateText(subject), translateText(subjectClothing), translateText(action),
+                    translateText(expression), translateText(place), translateText(soundMusic),
                     translateText(additionalDetails)
                 ]);
 
-                // --- Generate English Prompt with TRANSLATED text ---
                 let englishMainSentence = `A ${videoStyleEn} video, featuring ${subjectEn}`;
-                if (subjectClothingEn) { // Tambahkan pakaian terjemahan jika ada
-                    englishMainSentence += ` wearing ${subjectClothingEn}`;
-                }
-                if (nationalityEn && nationalityEn !== "Not Specified") {
-                    englishMainSentence += ` of ${nationalityEn} nationality`;
-                }
-                if (expressionEn) {
-                    englishMainSentence += ` with ${expressionEn} expression`;
-                }
+                if (subjectClothingEn) englishMainSentence += ` wearing ${subjectClothingEn}`;
+                if (nationalityEn && nationalityEn !== "Not Specified") englishMainSentence += ` of ${nationalityEn} nationality`;
+                if (expressionEn) englishMainSentence += ` with ${expressionEn} expression`;
                 englishMainSentence += `, ${actionEn} at ${placeEn} during the ${timeEn}.`;
 
-                let promptEn = englishMainSentence;
-
-                let detailsEnArray = [];
-                if (cameraMovementEn) detailsEnArray.push(`Camera Movement: ${cameraMovementEn}.`);
-                if (lightingEn) detailsEnArray.push(`Lighting: ${lightingEn}.`);
-                if (videoMoodEn) detailsEnArray.push(`Video Mood: ${videoMoodEn}.`);
+                let detailsEnArray = [`Camera Movement: ${cameraMovementEn}.`, `Lighting: ${lightingEn}.`, `Video Mood: ${videoMoodEn}.`];
                 if (soundMusicEn) detailsEnArray.push(`Sound/Music: ${soundMusicEn}.`);
-                if (languageEn && languageEn !== "Not Specified") {
-                    detailsEnArray.push(`Language Used: ${languageEn}.`);
-                }
-                if (spokenLines) detailsEnArray.push(`Spoken Lines: "${spokenLines}".`); // Spoken lines are NOT translated
+                if (languageEn && languageEn !== "Not Specified") detailsEnArray.push(`Language Used: ${languageEn}.`);
+                if (spokenLines) detailsEnArray.push(`Spoken Lines: "${spokenLines}".`);
                 if (additionalDetailsEn) detailsEnArray.push(`Additional Details: ${additionalDetailsEn}.`);
                 
-                if (detailsEnArray.length > 0) {
-                    promptEn += `\n\n${detailsEnArray.join("\n")}`;
-                }
+                promptOutputEnFinal.textContent = `${englishMainSentence}\n\n${detailsEnArray.join("\n")}`.trim();
 
-                promptOutputEnFinal.textContent = promptEn.trim();
-
-                // --- Show outputs ---
                 generatedPromptOutputsContainer.style.display = 'block';
                 copyIdBtn.style.display = 'inline-block';
                 copyEnBtn.style.display = 'inline-block';
+                geminiImproveBtn.style.display = 'inline-flex';
 
             } catch (error) {
                 console.error("Error during generation process:", error);
                 showToast("Terjadi kesalahan saat proses generasi prompt.", true);
             } finally {
-                // --- Hide Loading State ---
                 generateBtn.disabled = false;
-                generateBtn.textContent = 'Hasilkan Prompt';
+                generateBtn.innerHTML = originalButtonText;
             }
         });
 
@@ -522,28 +687,18 @@
 
         function copyToClipboard(text, successMessage) {
             if (!text) return;
-            fallbackCopyTextToClipboard(text, successMessage);
-        }
-
-        function fallbackCopyTextToClipboard(text, successMessage) {
             const textArea = document.createElement("textarea");
             textArea.value = text;
-            textArea.style.top = "0";
-            textArea.style.left = "0";
             textArea.style.position = "fixed";
             textArea.style.opacity = "0"; 
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
             try {
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    showToast(successMessage);
-                } else {
-                    showToast("Gagal menyalin prompt. Coba lagi.", true);
-                }
+                document.execCommand('copy');
+                showToast(successMessage);
             } catch (err) {
-                showToast("Gagal menyalin prompt karena kesalahan.", true);
+                showToast("Gagal menyalin prompt.", true);
             }
             document.body.removeChild(textArea);
         }
